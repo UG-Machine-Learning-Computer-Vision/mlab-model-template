@@ -1,0 +1,16 @@
+;Configuration file for model
+;=================================
+; Remove the ; from the beginning of the line to activate the parameter
+; They should be in the format
+; PARAM name type value
+; The types are
+; str - string
+; int - integer
+; float - floating point number
+; bool - boolean (true or false)
+; list - list of strings  without spaces between the items 
+; eg: PARAM windows list 234,128,64,32
+;
+;Lastly the dataset_url cannot be commented. Leave blank if you want to use the default dataset set in the DISAL system
+;Datasetfile  Url
+PARAM dataset_url str http://www.disal.org/dataset/2016-01

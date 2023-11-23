@@ -1,0 +1,53 @@
+# CI/CD to push code to server
+# run python create venv 
+# If requirements.txt has changed, install requirements.txt
+
+name: Push to server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Don't run if repo is template
+      - if : github.repository == 'UG-Machine-Learning-Computer-Vision/mlab-model-template'
+        name: Don't run if repo is template
+        run: exit 0
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: check if requirements.txt has changed
+        id: requirements
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            requirements.txt
+      - if : steps.requirements.outputs.paths-changed == 'true'
+        name: multiple command
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.MODELS_PATH }}/${{ secrets.PROJECT_NAME }}
+            git pull origin main
+            ./install.sh true
+      - if : steps.requirements.outputs.paths-changed == 'false'
+        name: push without installing requirements.txt
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.MODELS_PATH }}/${{ secrets.PROJECT_NAME }}
+            git pull origin main
+            ./install.sh false
+
+    
