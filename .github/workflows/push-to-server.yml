@@ -15,22 +15,6 @@ jobs:
       # STOP IF it is template repo
       - if : ${{ github.repository == 'UG-Machine-Learning-Computer-Vision/mlab-model-template' }}
         name: Stop execution
-        run: exit 0
-      # Chech if SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, MODELS_PATH, PROJECT_NAME are set
-      - if : ${{ secrets.SSH_HOST == '' }}
-        name: SSH_HOST not set
-        run: exit 1
-      - if : ${{ secrets.SSH_USER == '' }}
-        name: SSH_USER not set
-        run: exit 1
-      - if : ${{ secrets.SSH_PRIVATE_KEY == '' }}
-        name: SSH_PRIVATE_KEY not set
-        run: exit 1
-      - if : ${{ secrets.MODELS_PATH == '' }}
-        name: MODELS_PATH not set
-        run: exit 1
-      - if : ${{ secrets.PROJECT_NAME == '' }}
-        name: PROJECT_NAME not set
         run: exit 1
       - uses: actions/checkout@v2
       - name: Setup Python
