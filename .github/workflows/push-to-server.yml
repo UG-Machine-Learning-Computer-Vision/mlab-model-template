@@ -15,7 +15,7 @@ jobs:
       # STOP IF it is template repo
       - if : ${{ github.repository == 'UG-Machine-Learning-Computer-Vision/mlab-model-template' }}
         name: Stop execution
-        run: exit 1
+        run: exit 0
       - uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
