@@ -25,7 +25,7 @@ jobs:
         id: requirements
         uses: dorny/paths-filter@v2
         with:
-          filters: requirements.txt
+          filters: requirements*
       - if : steps.requirements.outputs.paths-changed == 'true'
         name: push with installing requirements.txt
         uses: appleboy/ssh-action@v1.0.0
