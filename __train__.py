@@ -7,8 +7,11 @@ import pickle
 import argparse
 import json
 import requests
+from dotenv import load_dotenv
 from model import train as train_model
 from __utils__ import fetch_parameters
+
+load_dotenv()
 if __name__ == "__main__":
   # Run the model, pass the file location, the file type and the dataset name
   # Where inputs would be from command line
@@ -55,7 +58,11 @@ if __name__ == "__main__":
         with open("history.pkl", "wb") as f:
             pickle.dump(model.history, f)
 
-    API_URL = "http://localhost:8000/api/results/train"
+    # Get API URL from .env file
+    API_URL = os.getenv("API_URL")
+
+    if API_URL is None:
+        raise ValueError("API_URL not found in .env file")
 
     # Stringify metrics
     metrics = json.dumps(model.metrics)

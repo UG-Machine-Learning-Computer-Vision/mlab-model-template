@@ -44,3 +44,12 @@ if [ "$1" = true ]; then
     source venv/bin/activate
     pip3 install -r requirements.txt
 fi
+
+# Check if .env file exists
+if [ -f ".env" ]; then
+    echo ".env file already exists"
+else
+    echo "Creating .env file"
+    touch .env
+    echo "MLAB_API_URL=$2" >> .env
+fi
