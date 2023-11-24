@@ -28,27 +28,58 @@ jobs:
           filters: |
             txt:
               - requirements.txt
-      - if : steps.requirements.outputs.txt == 'true'
-        name: push with installing requirements.txt
+      - name: push to server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ${{ secrets.MODELS_PATH }}
+            if [ -d ${{ secrets.PROJECT_NAME }} ]; then
+              git pull origin main
+            else
+              gh repo clone UG-Machine-Learning-Computer-Vision/${{ secrets.PROJECT_NAME }}
+            fi
             cd ${{ secrets.MODELS_PATH }}/${{ secrets.PROJECT_NAME }}
             git pull origin main
-            ./install.sh true ${{ secrets.MLAB_API_URL }}
-      - if : steps.requirements.outputs.txt == 'false'
-        name: push without installing requirements.txt
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.MODELS_PATH }}/${{ secrets.PROJECT_NAME }}
-            git pull origin main
-            ./install.sh false ${{ secrets.MLAB_API_URL }}
-
-    
+            if [ -f "model.py" ] && [ -f "config.txt" ] && [ -f "requirements.txt" ] && [ -f "__train__.py" ] && [ -f "__test__.py" ]; then 
+                echo "All files found"
+            else
+                echo "Not all files found"
+                exit 1
+            fi
+            if ! command -v python3 &> /dev/null
+            then
+                echo "Python3 could not be found"
+                exit 1
+            fi
+            if ! command -v pip3 &> /dev/null
+            then
+                echo "Pip3 could not be found"
+                exit 1
+            fi
+            if [ -d "venv" ]; then
+                echo "Virtual environment already exists"
+            else
+                echo "Creating virtual environment"
+                python3 -m venv venv
+            fi
+            if ${{ steps.requirements.outputs.txt == 'true' }}; then
+                source venv/bin/activate
+                pip3 install -r requirements.txt
+                #  If install fails, exit
+                if [ $? -eq 0 ]; then
+                    echo "Requirements installed successfully"
+                else
+                    echo "Requirements installation failed"
+                    exit 1
+                fi
+            fi
+            if [ -f ".env" ]; then
+                echo ".env file already exists"
+            else
+                echo "Creating .env file"
+                touch .env
+                echo "MLAB_API_URL=$2" >> .env
+            fi
