@@ -11,6 +11,13 @@
 ; list - list of strings  without spaces between the items 
 ; eg: PARAM windows list 234,128,64,32
 ;
+PARAM model str 3D-CNN
+PARAM model_file str model.py
+PARAM model_class str Model
+PARAM model_function str get_model
+PARAM windows list [[128,128,128], [64,64,64], [32,32,32]]
+PARAM batch_sizes list [1, 1, 1]
+PARAM learning_rates_test_size list [[0.0001, 0.0001, 0.0001], [0.0001, 0.0001, 0.0001]]
 ;Lastly the dataset_url cannot be commented. Leave blank if you want to use the default dataset set in the DISAL system
 ;Datasetfile  Url
 PARAM dataset_url str http://www.disal.org/dataset/2016-01

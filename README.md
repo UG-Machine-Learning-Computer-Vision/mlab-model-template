@@ -70,16 +70,8 @@ The types can be:
 
 A list of values should be provided in the following format:
 ```bash
-PARAM <name> list[<type>] <value1>,<value2>,<value3>
+PARAM <name> list <value1>,<value2>,<value3>
 ```
-Where:
-- `type` is the type of the values
-The values would be interpreted as a list of values of the specified type.
-The compatible types are:
-- `int`
-- `float`
-- `str`
-- `bool`
 
 ## Defining the train dataset
 
