@@ -78,8 +78,9 @@ jobs:
             fi
             if [ -f ".env" ]; then
                 echo ".env file already exists"
+                echo "MLAB_API_URL=${{ secrets.MLAB_API_URL }}" >> .env
             else
                 echo "Creating .env file"
                 touch .env
-                echo "MLAB_API_URL=$2" >> .env
+                echo "MLAB_API_URL=${{ secrets.MLAB_API_URL }}" >> .env
             fi

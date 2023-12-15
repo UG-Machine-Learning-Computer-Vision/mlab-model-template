@@ -51,50 +51,60 @@ if __name__ == "__main__":
     parameters = fetch_parameters(config_path=CONFIG_PATH)
     DATASET_PATH = str(parameters["dataset_url"]).strip() # type: ignore
 
-    model = train_model(dataset_path=DATASET_PATH, parameters=parameters, result_id=result_id)
-
-    if default:
-        # Dump the model history in a pickle file
-        with open("history.pkl", "wb") as f:
-            pickle.dump(model.history, f)
+    train_error = False
 
     # Get API URL from .env file
-    API_URL = os.getenv("API_URL")
+    API_URL = os.getenv("MLAB_API_URL")
 
     if API_URL is None:
         raise ValueError("API_URL not found in .env file")
+    try:
+        
+        model = train_model(dataset_path=DATASET_PATH, parameters=parameters, result_id=result_id)
+        if default:
+            # Dump the model history in a pickle file
+            with open("history.pkl", "wb") as f:
+                pickle.dump(model.history, f)
+        
+        files = {}
 
-    # Stringify metrics
-    metrics = json.dumps(model.metrics)
-
-
-    data = {
-        "result_id": result_id,
-        "metrics": metrics,
-        "history": model.history,
-    }
-
-    files = {}
-
-    for file in model.files:
-        filename = file.split("/")[-1].split(".")[0]
-        files['file'] = (filename, open(file, 'rb'))
-
-    # files = model.files
-
-    response = requests.post(API_URL, data=data, files=files,timeout=120)
-
-    if response.status_code == 200:
-        print("Successfully uploaded results")
         for file in model.files:
-            os.remove(file)
-    else:
-        print("Error uploading results")
+            filename = file.split("/")[-1]
+            files[filename] = (filename, open(file, 'rb'))
+
+        # Stringify metrics
+        metrics = json.dumps(model.metrics)
+        data = {
+            "result_id": result_id,
+            "metrics": metrics,
+            "history": model.history,
+        }
+
+            # files = model.files
+
+        response = requests.post(API_URL, data=data, files=files,timeout=120)
+
+        if response.status_code == 200:
+            print("Successfully uploaded results")
+            for file in model.files:
+                os.remove(file)
+        else:
+            print("Error uploading results")
+            # Append error in error.txt file
+            # First check if error.txt file exists
+            raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
+
+    except Exception as e:
         # Append error in error.txt file
         # First check if error.txt file exists
-        if not os.path.exists("error.txt"):
-            with open("error.txt", "w", encoding="utf-8") as f:
-                f.write(f"{result_id}\n")
+        if not os.path.exists(f"{result_id}/error.txt"):
+            with open(f"{result_id}/error.txt", "w", encoding="utf-8") as f:
+                f.write(str(e))
         else:
-            with open("error.txt", "a", encoding="utf-8") as f:
-                f.write(f"{result_id}\n")
+            with open(f"{result_id}/error.txt", "a", encoding="utf-8") as f:
+                f.write(str(e))
+        error_file = open(f"{result_id}/error.txt", "rb")
+        req_files = {
+            "error.txt": error_file,
+        }
+        requests.post(API_URL+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120)
