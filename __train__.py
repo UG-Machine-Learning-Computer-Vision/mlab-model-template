@@ -54,7 +54,7 @@ if __name__ == "__main__":
     train_error = False
 
     # Get API URL from .env file
-    API_URL = os.getenv("MLAB_API_URL")
+    API_URL = str(os.getenv("MLAB_API_URL")) + "/train"
 
     if API_URL is None:
         raise ValueError("API_URL not found in .env file")
